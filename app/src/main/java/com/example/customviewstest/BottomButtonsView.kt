@@ -123,16 +123,4 @@ class BottomButtonsView(
     fun setNegativeButtonText(text: String?) {
         binding.negativeButton.text = text ?: "Cancel"
     }
-
-    override fun onSaveInstanceState(): Parcelable? {
-        return super.onSaveInstanceState()
-    }
-
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        super.onRestoreInstanceState(state)
-    }
-
-
-
-
 }

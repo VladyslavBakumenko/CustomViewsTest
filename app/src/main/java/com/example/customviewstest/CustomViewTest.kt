@@ -6,12 +6,17 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
+import kotlin.coroutines.coroutineContext
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.properties.Delegates
+
+
+typealias CustomViewActionTestListener = (row: Int, column: Int) -> Unit
+
 
 class CustomViewTest(
     context: Context,
@@ -20,7 +25,7 @@ class CustomViewTest(
     defStyleRes: Int
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    private var field = CustomFieldsTest(TEST_ROWS, TEST_COLUMNS)
+    var field = CustomFieldsTest(TEST_ROWS, TEST_COLUMNS)
         set(value) {
             field.listeners.remove(listener)
             field = value
@@ -29,7 +34,7 @@ class CustomViewTest(
             requestLayout()
             invalidate()
         }
-
+    var actionListener: CustomViewActionTestListener? = null
 
     private var player1Color by Delegates.notNull<Int>()
     private var player2Color by Delegates.notNull<Int>()
@@ -61,7 +66,6 @@ class CustomViewTest(
     constructor(context: Context) : this(context, null)
 
     init {
-        field.setCell(2, 3, Cell.PLAYER_1)
         if (attrs != null) {
             initAttrs(attrs, defStyleAttr, defStyleRes)
         } else {
@@ -80,7 +84,7 @@ class CustomViewTest(
             .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3f, resources.displayMetrics)
 
         player2Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        player2Paint.color = player2Color
+        player2Paint.color = Color.BLUE
         player2Paint.style = Paint.Style.STROKE
         player2Paint.strokeWidth = TypedValue
             .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3f, resources.displayMetrics)
@@ -90,6 +94,31 @@ class CustomViewTest(
         gridPaint.style = Paint.Style.STROKE
         gridPaint.strokeWidth = TypedValue
             .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f, resources.displayMetrics)
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        var result = false
+        when(event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                result = true
+            }
+            MotionEvent.ACTION_UP -> {
+                val row = getRow(event)
+                val column = getRow(event)
+                actionListener?.invoke(row, column)
+                result = true
+            }
+        }
+        return result
+    }
+
+    private fun getRow(event: MotionEvent): Int {
+        return ((event.y - fieldRect.top) / cellSize).toInt()
+    }
+
+    private fun getColumn(event: MotionEvent): Int {
+        return ((event.x - fieldRect.left) / cellSize).toInt()
+
     }
 
     override fun onAttachedToWindow() {
@@ -181,7 +210,7 @@ class CustomViewTest(
                 val cell = field.getCell(row, column)
                 if (cell == Cell.PLAYER_1) {
                     drawPlayer1(canvas, row, column)
-                } else {
+                } else if (cell == Cell.PLAYER_2) {
                     drawPlayer2(canvas, row, column)
                 }
             }
@@ -196,12 +225,19 @@ class CustomViewTest(
 
     private fun drawPlayer2(canvas: Canvas?, row: Int, column: Int) {
         val cellRect = getCellRect(row, column)
+
+        canvas?.drawCircle(
+            cellRect.centerX(),
+            cellRect.centerY(),
+            cellRect.width() / 2,
+            player2Paint
+        )
     }
 
     private fun getCellRect(row: Int, column: Int): RectF {
         cellRect.left = fieldRect.left + column * cellSize + cellPadding
         cellRect.top = fieldRect.top + row * cellSize + cellPadding
-        cellRect.right = fieldRect.left + cellSize - cellPadding * 2
+        cellRect.right = cellRect.left + cellSize - cellPadding * 2
         cellRect.bottom = cellRect.top + cellSize - cellPadding * 2
         return cellRect
     }
@@ -228,7 +264,7 @@ class CustomViewTest(
     }
 
     private val listener: OnFieldChangerListener = {
-
+        invalidate()
     }
 
     companion object {
