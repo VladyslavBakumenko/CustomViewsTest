@@ -6,17 +6,16 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
-import kotlin.coroutines.coroutineContext
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.properties.Delegates
 
 
 typealias CustomViewActionTestListener = (row: Int, column: Int) -> Unit
-
 
 class CustomViewTest(
     context: Context,
@@ -117,8 +116,10 @@ class CustomViewTest(
     }
 
     private fun getColumn(event: MotionEvent): Int {
-        return ((event.x - fieldRect.left) / cellSize).toInt()
+        Log.d("fdfdfdfdf", fieldRect.right.toString())
+        Log.d("fdfdfdfdf", "${fieldRect.left / cellSize}")
 
+        return ((event.x - fieldRect.right) / cellSize).toInt()
     }
 
     override fun onAttachedToWindow() {
@@ -233,6 +234,7 @@ class CustomViewTest(
             player2Paint
         )
     }
+
 
     private fun getCellRect(row: Int, column: Int): RectF {
         cellRect.left = fieldRect.left + column * cellSize + cellPadding

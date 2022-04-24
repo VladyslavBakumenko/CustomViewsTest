@@ -24,21 +24,19 @@ class CustomViewSurfaceViewTest(context: Context) : SurfaceView(context), Surfac
     }
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
-        surfaceDrawingThread.rednering = false
-        surfaceDrawingThread.join()
-        Log.d("testtest", "SurfaceHolder:")
+        surfaceDrawingThread.runThread = false
 
+        Log.d("testtest", "SurfaceHolder:")
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val result = false
+        var result = false
         if (event?.action == MotionEvent.ACTION_DOWN) {
+            surfaceDrawingThread.join()
             surfaceDrawingThread.start()
-            result
+            result = true
         }
         return result
     }
-
-
 }
 

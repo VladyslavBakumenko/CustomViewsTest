@@ -10,8 +10,5 @@ class SurfaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(CustomViewSurfaceViewTest(this))
         Toast.makeText(this, "Tab to screen for stars", Toast.LENGTH_LONG).show()
-
     }
-
-
 }
