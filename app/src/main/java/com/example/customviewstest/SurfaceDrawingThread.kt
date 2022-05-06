@@ -1,15 +1,15 @@
 package com.example.customviewstest
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
+import android.util.Log
 import android.view.SurfaceHolder
+import kotlin.properties.Delegates
 import kotlin.random.Random
 
 class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() {
 
     var runThread = true
+    private var frameTime by Delegates.notNull<Long>()
 
     private var downDirection = true
     private var isFirstIteration = true
@@ -34,6 +34,7 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
         surfaceHolder.unlockCanvasAndPost(canvas)
 
         while (runThread) {
+            val frameStartTime = System.nanoTime();
             if (isFirstIteration) {
                 surfaceHolder.lockCanvas()
                 drawObject(centerX.toFloat(), centerY.toFloat(), canvas)
@@ -49,8 +50,7 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
                 centerY++
                 circleRect.right++
                 circleRect.left++
-
-                if (circleRect.left == canvas.width.toFloat()) {
+                if (circleRect.left.toInt() == canvas.width) {
                     downDirection = false
                     resetColor()
                 }
@@ -60,14 +60,22 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
                 circleRect.right--
                 circleRect.left--
 
-                if (circleRect.right == 0f) {
+                if (circleRect.right.toInt() == 0) {
                     downDirection = true
                     resetColor()
                 }
             }
-
             surfaceHolder.unlockCanvasAndPost(canvas)
-            sleep(DELAY_FOR_30_FPS)
+
+            frameTime = (System.nanoTime() - frameStartTime) / 1000000
+            if (frameTime < MAX_FRAME_TIME)
+            {
+                try {
+                    sleep(MAX_FRAME_TIME - frameTime)
+                } catch (e: InterruptedException) {
+
+                }
+            }
         }
     }
 
@@ -92,7 +100,8 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
 
     companion object {
         const val DESIRED_CELL_SIZE = 50f
-        const val DELAY_FOR_30_FPS: Long = 30
-        const val STROKE_WIDTH = 70f
+        const val STROKE_WIDTH = 5f
+        const val MAX_FRAME_TIME = (1000 / 30)
     }
 }
+

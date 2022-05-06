@@ -16,17 +16,14 @@ class CustomViewSurfaceViewTest(context: Context) : SurfaceView(context), Surfac
 
     override fun surfaceCreated(p0: SurfaceHolder) {
         surfaceDrawingThread.run()
-        Log.d("testtest", "surfaceCreated:")
     }
 
     override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
-        Log.d("testtest", "surfaceChanged:")
     }
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
         surfaceDrawingThread.runThread = false
 
-        Log.d("testtest", "SurfaceHolder:")
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {

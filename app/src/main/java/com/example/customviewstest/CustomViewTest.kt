@@ -97,13 +97,13 @@ class CustomViewTest(
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         var result = false
-        when(event?.action) {
+        when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 result = true
             }
             MotionEvent.ACTION_UP -> {
                 val row = getRow(event)
-                val column = getRow(event)
+                val column = getColumn(event)
                 actionListener?.invoke(row, column)
                 result = true
             }
@@ -116,10 +116,11 @@ class CustomViewTest(
     }
 
     private fun getColumn(event: MotionEvent): Int {
-        Log.d("fdfdfdfdf", fieldRect.right.toString())
-        Log.d("fdfdfdfdf", "${fieldRect.left / cellSize}")
-
-        return ((event.x - fieldRect.right) / cellSize).toInt()
+        Log.d("fdfdfdf", event.x.toString())
+        Log.d("fdfdfdf", fieldRect.right.toString())
+        Log.d("fdfdfdf", cellSize.toString())
+        Log.d("fdfdfdf", ((event.x * 2 - fieldRect.right) / cellSize).toInt().toString())
+        return ((event.x - fieldRect.left) / cellSize).toInt()
     }
 
     override fun onAttachedToWindow() {
