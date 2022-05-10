@@ -37,6 +37,7 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
     private var runtimeProbability by Delegates.notNull<Int>()
 
     override fun run() {
+
         val canvas = surfaceHolder.lockCanvas()
         centerX = canvas.width / 2
         centerY = canvas.height / 2
@@ -74,7 +75,8 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
             if (frameTime < MAX_FRAME_TIME) {
                 try {
                     sleep(MAX_FRAME_TIME - frameTime)
-                } catch (e: InterruptedException) { }
+                } catch (e: InterruptedException) {
+                }
             }
         }
     }
