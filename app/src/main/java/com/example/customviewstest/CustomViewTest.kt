@@ -116,10 +116,6 @@ class CustomViewTest(
     }
 
     private fun getColumn(event: MotionEvent): Int {
-        Log.d("fdfdfdf", event.x.toString())
-        Log.d("fdfdfdf", fieldRect.right.toString())
-        Log.d("fdfdfdf", cellSize.toString())
-        Log.d("fdfdfdf", ((event.x * 2 - fieldRect.right) / cellSize).toInt().toString())
         return ((event.x - fieldRect.left) / cellSize).toInt()
     }
 

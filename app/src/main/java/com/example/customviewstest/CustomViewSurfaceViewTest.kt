@@ -23,15 +23,20 @@ class CustomViewSurfaceViewTest(context: Context) : SurfaceView(context), Surfac
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
         surfaceDrawingThread.runThread = false
-
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         var result = false
+
         if (event?.action == MotionEvent.ACTION_DOWN) {
-            surfaceDrawingThread.join()
-            surfaceDrawingThread.start()
-            result = true
+            if(!surfaceDrawingThread.motion) {
+                with(surfaceDrawingThread) {
+                    motion = true
+                    join()
+                    start()
+                }
+                result = true
+            }
         }
         return result
     }

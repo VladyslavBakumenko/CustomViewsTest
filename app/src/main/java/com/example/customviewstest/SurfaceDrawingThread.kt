@@ -3,15 +3,24 @@ package com.example.customviewstest
 import android.graphics.*
 import android.util.Log
 import android.view.SurfaceHolder
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.properties.Delegates
 import kotlin.random.Random
+
+enum class Sides {
+    LEFT, RIGHT, TOP, BOTTOM
+}
 
 class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() {
 
     var runThread = true
+    var motion = false
     private var frameTime by Delegates.notNull<Long>()
 
-    private var downDirection = true
+    private var sideFrom: Sides = Sides.TOP
+    private lateinit var sideTo: Sides
+
     private var isFirstIteration = true
     private val circlePainter = Paint().apply {
         color = Color.BLUE
@@ -19,64 +28,120 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
         strokeWidth = STROKE_WIDTH
     }
 
+    private var centerX by Delegates.notNull<Int>()
+    private var centerY by Delegates.notNull<Int>()
+    private var differenceX by Delegates.notNull<Int>()
+    private var differenceY by Delegates.notNull<Int>()
+    private var relationSynchronization by Delegates.notNull<Double>()
+    private var probability by Delegates.notNull<Int>()
+    private var runtimeProbability by Delegates.notNull<Int>()
+
     override fun run() {
         val canvas = surfaceHolder.lockCanvas()
-        var centerX = canvas.width / 2
-        var centerY = canvas.height / 2
-
-        val circleRect =
-            RectF(
-                centerX + DESIRED_CELL_SIZE + STROKE_WIDTH / 2,
-                centerY + DESIRED_CELL_SIZE + STROKE_WIDTH / 2,
-                centerX - DESIRED_CELL_SIZE - STROKE_WIDTH / 2,
-                centerY - DESIRED_CELL_SIZE - STROKE_WIDTH / 2
-            )
+        centerX = canvas.width / 2
+        centerY = canvas.height / 2
+        val pointFrom = Point(centerX, centerY)
+        val pointTo = Point(0, 0)
+        resetRelationSynchronization(pointTo, pointFrom)
         surfaceHolder.unlockCanvasAndPost(canvas)
 
         while (runThread) {
-            val frameStartTime = System.nanoTime();
+            val frameStartTime = System.nanoTime()
             if (isFirstIteration) {
                 surfaceHolder.lockCanvas()
+                setPointTo(canvas, pointTo)
                 drawObject(centerX.toFloat(), centerY.toFloat(), canvas)
                 isFirstIteration = false
                 surfaceHolder.unlockCanvasAndPost(canvas)
                 return
             }
             surfaceHolder.lockCanvas()
-            drawObject(centerX.toFloat(), centerY.toFloat(), canvas)
 
-            if (downDirection) {
-                centerX++
-                centerY++
-                circleRect.right++
-                circleRect.left++
-                if (circleRect.left.toInt() == canvas.width) {
-                    downDirection = false
-                    resetColor()
-                }
-            } else {
-                centerX--
-                centerY--
-                circleRect.right--
-                circleRect.left--
-
-                if (circleRect.right.toInt() == 0) {
-                    downDirection = true
-                    resetColor()
-                }
+            if (centerX == pointTo.x && centerY == pointTo.y) {
+                pointFrom.x = pointTo.x
+                pointFrom.y = pointTo.y
+                setPointTo(canvas, pointTo)
+                while (sideFrom == sideTo) setPointTo(canvas, pointTo)
+                resetColor()
+                resetRelationSynchronization(pointTo, pointFrom)
+                sideFrom = sideTo
             }
-            surfaceHolder.unlockCanvasAndPost(canvas)
+            drawObject(centerX.toFloat(), centerY.toFloat(), canvas)
+            resetCircleCoordinates(pointTo)
 
+            surfaceHolder.unlockCanvasAndPost(canvas)
             frameTime = (System.nanoTime() - frameStartTime) / 1000000
-            if (frameTime < MAX_FRAME_TIME)
-            {
+            if (frameTime < MAX_FRAME_TIME) {
                 try {
                     sleep(MAX_FRAME_TIME - frameTime)
-                } catch (e: InterruptedException) {
+                } catch (e: InterruptedException) { }
+            }
+        }
+    }
 
+    private fun setPointTo(canvas: Canvas, pointTo: Point) {
+
+        with(pointTo) {
+            when (Random.nextInt(1, 5)) {
+
+                1 -> {
+                    x = Random.nextInt(0, canvas.width)
+                    y = 0
+                    sideTo = Sides.TOP
+                }
+                2 -> {
+                    x = Random.nextInt(canvas.width)
+                    y = Random.nextInt(0, canvas.height)
+                    sideTo = Sides.RIGHT
+                }
+                3 -> {
+                    x = Random.nextInt(0, canvas.width)
+                    y = canvas.height
+                    sideTo = Sides.BOTTOM
+                }
+                4 -> {
+                    x = 0
+                    y = Random.nextInt(0, canvas.height)
+                    sideTo = Sides.LEFT
                 }
             }
         }
+        Log.d("ffdfdfds", pointTo.toString())
+    }
+
+    private fun resetCircleCoordinates(pointTo: Point) {
+        if (differenceX > differenceY) {
+            if (centerX > pointTo.x) centerX--
+            else if (centerX < pointTo.x) centerX++
+
+            probability = (relationSynchronization * 100).toInt()
+            runtimeProbability = Random.nextInt(0, 101)
+            if (runtimeProbability < probability) {
+                if (centerY > pointTo.y) centerY--
+                else if (centerY < pointTo.y) centerY++
+            }
+        }
+
+        if (differenceX < differenceY) {
+            probability = (relationSynchronization * 100).toInt()
+            runtimeProbability = Random.nextInt(0, 101)
+            if (runtimeProbability <= probability) {
+                if (centerX > pointTo.x) centerX--
+                else if (centerX < pointTo.x) centerX++
+            }
+
+            if (centerY > pointTo.y) centerY--
+            else if (centerY < pointTo.y) centerY++
+        }
+    }
+
+    private fun resetRelationSynchronization(pointTo: Point, pointFrom: Point) {
+        differenceX = max(pointTo.x, pointFrom.x) - min(pointTo.x, pointFrom.x)
+        differenceY = max(pointTo.y, pointFrom.y) - min(pointTo.y, pointFrom.y)
+        relationSynchronization = min(differenceX.toDouble(), differenceY.toDouble()) / max(
+            differenceX.toDouble(),
+            differenceY.toDouble()
+        )
     }
 
     private fun drawObject(x: Float, y: Float, canvas: Canvas) {
@@ -104,4 +169,3 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
         const val MAX_FRAME_TIME = (1000 / 30)
     }
 }
-
