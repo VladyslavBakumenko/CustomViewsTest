@@ -80,8 +80,8 @@ class SurfaceDrawingThread(private val surfaceHolder: SurfaceHolder) : Thread() 
                 frameTime = (System.nanoTime() - frameStartTime) / 1000000
                 if (frameTime < MAX_FRAME_TIME) {
                     try {
-                        sleep(MAX_FRAME_TIME - frameTime)
-                       // sleep(1)
+                       // sleep(MAX_FRAME_TIME - frameTime)
+                        sleep(1)
                     } catch (e: InterruptedException) {
                     }
                 }

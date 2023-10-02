@@ -45,6 +45,7 @@ class CustomViewTest(
 
     private lateinit var player1Paint: Paint
     private lateinit var player2Paint: Paint
+    private lateinit var paintCellBackground: Paint
     private lateinit var gridPaint: Paint
 
     private val cellRect = RectF()
@@ -71,10 +72,15 @@ class CustomViewTest(
             initDefColors()
         }
         initPaints()
-
     }
 
     private fun initPaints() {
+
+        paintCellBackground = Paint(Paint.ANTI_ALIAS_FLAG)
+        paintCellBackground.color = context.getColor(R.color.selected_sell_background)
+        paintCellBackground.style = Paint.Style.FILL
+        paintCellBackground.strokeWidth =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20f, resources.displayMetrics)
 
         player1Paint = Paint(Paint.ANTI_ALIAS_FLAG)
         player1Paint.color = player1Color
@@ -96,9 +102,12 @@ class CustomViewTest(
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+
         var result = false
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
+                Log.d("fgfssfgds", "x ->>> ${event?.x}")
+                Log.d("fgfssfgds", "y ->>> ${event?.y}")
                 result = true
             }
             MotionEvent.ACTION_UP -> {
@@ -115,8 +124,16 @@ class CustomViewTest(
         return ((event.y - fieldRect.top) / cellSize).toInt()
     }
 
+    private fun getRow(y: Float): Int {
+        return ((y - fieldRect.top) / cellSize).toInt()
+    }
+
     private fun getColumn(event: MotionEvent): Int {
         return ((event.x - fieldRect.left) / cellSize).toInt()
+    }
+
+    private fun getColumn(x: Float): Int {
+        return ((x - fieldRect.left) / cellSize).toInt()
     }
 
     override fun onAttachedToWindow() {
@@ -182,6 +199,12 @@ class CustomViewTest(
         if (cellSize == 0f) return
         drawGrid(canvas)
         drawCells(canvas)
+        drawLab(canvas)
+    }
+
+    private fun drawLab(canvas: Canvas?) {
+       // setGreedLikeItsFirstLab(canvas)
+      //setGreedLikeItsSecondLab(canvas)
     }
 
     private fun drawGrid(canvas: Canvas?) {
@@ -216,20 +239,34 @@ class CustomViewTest(
     }
 
     private fun drawPlayer1(canvas: Canvas?, row: Int, column: Int) {
-        val cellRect = getCellRect(row, column)
-        canvas?.drawLine(cellRect.left, cellRect.top, cellRect.right, cellRect.bottom, player1Paint)
-        canvas?.drawLine(cellRect.right, cellRect.top, cellRect.left, cellRect.bottom, player1Paint)
+//        val cellRect = getCellRect(row, column)
+//        canvas?.drawLine(cellRect.left, cellRect.top, cellRect.right, cellRect.bottom, player1Paint)
+//        canvas?.drawLine(cellRect.right, cellRect.top, cellRect.left, cellRect.bottom, player1Paint)
+        changeCellBackgroundColor(canvas, row, column)
     }
 
     private fun drawPlayer2(canvas: Canvas?, row: Int, column: Int) {
-        val cellRect = getCellRect(row, column)
+//        val cellRect = getCellRect(row, column)
 
-        canvas?.drawCircle(
-            cellRect.centerX(),
-            cellRect.centerY(),
-            cellRect.width() / 2,
-            player2Paint
+//        canvas?.drawCircle(
+//            cellRect.centerX(),
+//            cellRect.centerY(),
+//            cellRect.width() / 2,
+//            player2Paint
+//        )
+        changeCellBackgroundColor(canvas, row, column)
+    }
+
+    private fun changeCellBackgroundColor(canvas: Canvas?, row: Int, column: Int) {
+        val cellRect = getCellRect(row, column)
+        canvas?.drawRect(
+            cellRect.left - 20,
+            cellRect.top - 20,
+            cellRect.right + 20,
+            cellRect.bottom + 20,
+            paintCellBackground
         )
+//        canvas?.drawRoundRect(cellRect.left, cellRect.top, cellRect.right, cellRect.bottom, 20f, 20f, player1Paint)
     }
 
 
@@ -264,6 +301,41 @@ class CustomViewTest(
 
     private val listener: OnFieldChangerListener = {
         invalidate()
+    }
+
+    private fun setGreedLikeItsFirstLab(canvas: Canvas?) {
+        checkGreedFields()
+        changeCellBackgroundColor(canvas, getRow(620f), getColumn(594f))
+        changeCellBackgroundColor(canvas, getRow(499f), getColumn(482f))
+        changeCellBackgroundColor(canvas, getRow(515f), getColumn(388f))
+        changeCellBackgroundColor(canvas, getRow(379f), getColumn(257f))
+        changeCellBackgroundColor(canvas, getRow(270f), getColumn(148f))
+        changeCellBackgroundColor(canvas, getRow(187f), getColumn(75f))
+    }
+
+    private fun setGreedLikeItsSecondLab(canvas: Canvas?) {
+        checkGreedFields()
+        changeCellBackgroundColor(canvas, getRow(504f), getColumn(476f))
+        changeCellBackgroundColor(canvas, getRow(473f), getColumn(586f))
+        changeCellBackgroundColor(canvas, getRow(734f), getColumn(821f))
+        changeCellBackgroundColor(canvas, getRow(817f), getColumn(805f))
+        changeCellBackgroundColor(canvas, getRow(947f), getColumn(701f))
+        changeCellBackgroundColor(canvas, getRow(629f), getColumn(362f))
+        changeCellBackgroundColor(canvas, getRow(718f), getColumn(304f))
+        changeCellBackgroundColor(canvas, getRow(838f), getColumn(268f))
+        changeCellBackgroundColor(canvas, getRow(926f), getColumn(382f))
+        changeCellBackgroundColor(canvas, getRow(1041f), getColumn(476f))
+        changeCellBackgroundColor(canvas, getRow(1051f), getColumn(596f))
+        changeCellBackgroundColor(canvas, getRow(635f), getColumn(732f))
+    }
+
+    private fun setGreedLikeItsThirdLab() {
+
+    }
+
+    private fun checkGreedFields() {
+        if (field.rows != 10 || field.columns != 10)
+            throw RuntimeException("Rows or columns != 10, greed will not display correctly")
     }
 
     companion object {
